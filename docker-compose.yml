@@ -1,0 +1,54 @@
+version: '2'
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: web.dockerfile
+    volumes:
+      - ./:/var/www
+    ports:
+      - 8080:80
+    links:
+      - app
+
+  app:
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    volumes:
+      - ./:/var/www
+    links:
+      - database
+    environment:
+      - DB_PORT=3306
+      - DB_HOST=database
+  
+  database:
+    image: mysql:5.6
+#    container_name: database
+    environment:
+        MYSQL_ROOT_PASSWORD: secret
+        MYSQL_DATABASE: dockerApp
+    ports:
+        - 33061:3306
+
+  myadmin:
+    image: phpmyadmin/phpmyadmin
+#    container_name: myadmin
+    environment:
+      - PMA_HOST=database
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+      - PMA_ARBITRARY=1
+    restart: always
+    ports:
+      - 32775:80
+    volumes:
+      - /sessions
+
+  cache:
+    image: redis:3.0
+    ports: 
+      - 63791:6379
+    
+  
